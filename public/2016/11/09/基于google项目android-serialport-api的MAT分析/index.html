@@ -68,7 +68,7 @@
 <link href="/css/main.css?v=5.0.2" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Testing,Another Tag," />
+  <meta name="keywords" content="Android,MAT," />
 
 
 
@@ -84,16 +84,19 @@
 
 
 
-<meta name="description" content="Keep Going">
+<meta name="description" content="先看一段google code的一段串口代码，在这段代码有这么一行mInputStream.read(buffer)，这是输入流的阻塞方法。如果mInputStream.read(buffer)未接收到数据，就重复关闭开启含有这段代码的Activity.就会造成Activity泄露，泄露现象通过重复开启关闭Activity,记录每一次的内存快照，再用MAT进行分析.
+private class">
 <meta property="og:type" content="article">
-<meta property="og:title" content="testing2">
-<meta property="og:url" content="http://yoursite.com/2016/11/08/testing2/index.html">
+<meta property="og:title" content="基于google项目android-serialport-api的MAT分析">
+<meta property="og:url" content="http://yoursite.com/2016/11/09/基于google项目android-serialport-api的MAT分析/index.html">
 <meta property="og:site_name" content="Chris cheng'Blog">
-<meta property="og:description" content="Keep Going">
-<meta property="og:updated_time" content="2016-11-08T05:38:39.714Z">
+<meta property="og:description" content="先看一段google code的一段串口代码，在这段代码有这么一行mInputStream.read(buffer)，这是输入流的阻塞方法。如果mInputStream.read(buffer)未接收到数据，就重复关闭开启含有这段代码的Activity.就会造成Activity泄露，泄露现象通过重复开启关闭Activity,记录每一次的内存快照，再用MAT进行分析.
+private class">
+<meta property="og:updated_time" content="2016-11-09T07:46:55.535Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="testing2">
-<meta name="twitter:description" content="Keep Going">
+<meta name="twitter:title" content="基于google项目android-serialport-api的MAT分析">
+<meta name="twitter:description" content="先看一段google code的一段串口代码，在这段代码有这么一行mInputStream.read(buffer)，这是输入流的阻塞方法。如果mInputStream.read(buffer)未接收到数据，就重复关闭开启含有这段代码的Activity.就会造成Activity泄露，泄露现象通过重复开启关闭Activity,记录每一次的内存快照，再用MAT进行分析.
+private class">
 
 
 
@@ -114,10 +117,10 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2016/11/08/testing2/"/>
+  <link rel="canonical" href="http://yoursite.com/2016/11/09/基于google项目android-serialport-api的MAT分析/"/>
 
 
-  <title> testing2 | Chris cheng'Blog </title>
+  <title> 基于google项目android-serialport-api的MAT分析 | Chris cheng'Blog </title>
 </head>
 
 <body itemscope itemtype="//schema.org/WebPage" lang="zh-Hans">
@@ -266,7 +269,7 @@
             
             
               
-                testing2
+                基于google项目android-serialport-api的MAT分析
               
             
           </h1>
@@ -278,8 +281,8 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-11-08T13:37:22+08:00" content="2016-11-08">
-              2016-11-08
+            <time itemprop="dateCreated" datetime="2016-11-09T14:58:19+08:00" content="2016-11-09">
+              2016-11-09
             </time>
           </span>
 
@@ -292,8 +295,8 @@
               <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/测试/" itemprop="url" rel="index">
-                    <span itemprop="name">测试</span>
+                  <a href="/categories/Android/" itemprop="url" rel="index">
+                    <span itemprop="name">Android</span>
                   </a>
                 </span>
 
@@ -308,8 +311,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2016/11/08/testing2/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/11/08/testing2/" itemprop="commentsCount"></span>
+                <a href="/2016/11/09/基于google项目android-serialport-api的MAT分析/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/11/09/基于google项目android-serialport-api的MAT分析/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -332,7 +335,59 @@
       
 
       
-        
+        <ul>
+<li><p>先看一段google code的一段串口代码，在这段代码有这么一行<strong>mInputStream.read(buffer)</strong>，这是输入流的阻塞方法。如果mInputStream.read(buffer)未接收到数据，就重复关闭开启含有这段代码的Activity.就会造成Activity泄露，泄露现象通过重复开启关闭Activity,记录每一次的内存快照，再用MAT进行分析.</p>
+<pre><code>private class ReadThread extends Thread {
+        @Override
+        public void run() {
+            super.run();
+            while(!isInterrupted()) {
+                int size;
+                try {
+                    byte[] buffer = new byte[64];
+                    if (mInputStream == null) return;
+                    size = mInputStream.read(buffer);
+                    if (size &gt; 0) {
+                        onDataReceived(buffer, size);
+                    }
+                    SystemClock.sleep(100);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return;
+                }
+            }
+        }
+    }
+</code></pre></li>
+</ul>
+<ul>
+<li><p>解决方法很简单，添加一个mInputStream.available() &gt; 0，如果有数据，就进行读取。没有数据就不读取。这样就避开了阻塞问题。</p>
+<pre><code>private class ReadThread extends Thread {
+    @Override
+    public void run() {
+        super.run();
+        while(!isInterrupted()) {
+            int size;
+            try {
+                byte[] buffer = new byte[64];
+                if (mInputStream == null) return;
+                if (mInputStream.available() &gt; 0) {
+                    size = mInputStream.read(buffer);
+                    if (size &gt; 0) {
+                        onDataReceived(buffer, size);
+                    }
+                }
+                SystemClock.sleep(100);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
+        }
+    }
+}
+</code></pre></li>
+</ul>
+
       
     </div>
 
@@ -354,9 +409,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Testing/" rel="tag">#Testing</a>
+            <a href="/tags/Android/" rel="tag">#Android</a>
           
-            <a href="/tags/Another-Tag/" rel="tag">#Another Tag</a>
+            <a href="/tags/MAT/" rel="tag">#MAT</a>
           
         </div>
       
@@ -365,8 +420,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/11/08/testing/" rel="next" title="testing">
-                <i class="fa fa-chevron-left"></i> testing
+              <a href="/2016/11/09/如何使用Hexo/" rel="next" title="如何使用Hexo">
+                <i class="fa fa-chevron-left"></i> 如何使用Hexo
               </a>
             
           </div>
@@ -397,8 +452,8 @@
           
   <div class="comments" id="comments">
     
-      <div class="ds-thread" data-thread-key="2016/11/08/testing2/"
-           data-title="testing2" data-url="http://yoursite.com/2016/11/08/testing2/">
+      <div class="ds-thread" data-thread-key="2016/11/09/基于google项目android-serialport-api的MAT分析/"
+           data-title="基于google项目android-serialport-api的MAT分析" data-url="http://yoursite.com/2016/11/09/基于google项目android-serialport-api的MAT分析/">
       </div>
     
   </div>
@@ -451,7 +506,7 @@
           
             <div class="site-state-item site-state-categories">
               <a href="/categories">
-                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-count">2</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -460,7 +515,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-count">3</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
