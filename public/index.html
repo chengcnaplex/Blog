@@ -190,22 +190,22 @@
         </li>
       
         
-        <li class="menu-item menu-item-categories">
-          <a href="/categories" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
-            
-            分类
-          </a>
-        </li>
-      
-        
         <li class="menu-item menu-item-archives">
           <a href="/archives" rel="section">
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
             归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
           </a>
         </li>
       
@@ -246,6 +246,138 @@
           <div id="content" class="content">
             
   <section id="posts" class="posts-expand">
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="//schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/11/10/如何在AndroidStudio下使用JNI/" itemprop="url">
+                  如何在AndroidStudio下使用JNI
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-11-10T16:46:38+08:00" content="2016-11-10">
+              2016-11-10
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index">
+                    <span itemprop="name">Android</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/11/10/如何在AndroidStudio下使用JNI/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/11/10/如何在AndroidStudio下使用JNI/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+          这是一个基于Android studio 的JNIdemo，仅供学习Demo地址
+新建工程
+新建项目工程JNIDemo，把工程结构调成 Project，如下图所示：
+
+
+
+配置环境
+找到gradle.properties,在下面加上一行android.useDeprecatedNdk=true，解决
+          ...
+
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2016/11/10/如何在AndroidStudio下使用JNI/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
     
       
 
@@ -338,60 +470,14 @@
       
         
           
-            <ul>
-<li><p>先看一段google code的一段串口代码，在这段代码有这么一行<strong>mInputStream.read(buffer)</strong>，这是输入流的阻塞方法。如果mInputStream.read(buffer)未接收到数据，就重复关闭开启含有这段代码的Activity.就会造成Activity泄露，泄露现象通过重复开启关闭Activity,记录每一次的内存快照，再用MAT进行分析.</p>
-<pre><code>private class ReadThread extends Thread {
-        @Override
-        public void run() {
-            super.run();
-            while(!isInterrupted()) {
-                int size;
-                try {
-                    byte[] buffer = new byte[64];
-                    if (mInputStream == null) return;
-                    size = mInputStream.read(buffer);
-                    if (size &gt; 0) {
-                        onDataReceived(buffer, size);
-                    }
-                    SystemClock.sleep(100);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    return;
-                }
-            }
-        }
-    }
-</code></pre></li>
-</ul>
-<ul>
-<li><p>解决方法很简单，添加一个mInputStream.available() &gt; 0，如果有数据，就进行读取。没有数据就不读取。这样就避开了阻塞问题。</p>
-<pre><code>private class ReadThread extends Thread {
-    @Override
-    public void run() {
-        super.run();
-        while(!isInterrupted()) {
-            int size;
-            try {
-                byte[] buffer = new byte[64];
-                if (mInputStream == null) return;
-                if (mInputStream.available() &gt; 0) {
-                    size = mInputStream.read(buffer);
-                    if (size &gt; 0) {
-                        onDataReceived(buffer, size);
-                    }
-                }
-                SystemClock.sleep(100);
-            } catch (IOException e) {
-                e.printStackTrace();
-                return;
-            }
-        }
-    }
-}
-</code></pre></li>
-</ul>
+          先看一段google code的一段串口代码，在这段代码有这么一行mInputStream.read(buffer)，这是输入流的阻塞方法。如果mInputStream.read(buffer)未接收到数据，就重复关闭开启含有这段代码的Activity.就会造成Activity泄露，泄露现象通过重复
+          ...
 
-          
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2016/11/09/基于google项目android-serialport-api的MAT分析/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
         
       
     </div>
@@ -509,13 +595,19 @@
       
         
           
-            <ol>
-<li><a href="https://hexo.io/zh-cn/docs/" target="_blank" rel="external">Hexo教学地址</a></li>
-<li><a href="http://theme-next.iissnan.com/" target="_blank" rel="external">主题NexT教学地址</a></li>
-<li><a href="http://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000" target="_blank" rel="external">Git教学地址</a></li>
-</ol>
+          
+Hexo教学地址
+主题NexT教学地址
+Git教学地址
+
 
           
+
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2016/11/09/如何使用Hexo/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
         
       
     </div>
@@ -583,7 +675,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">2</span>
+              <span class="site-state-item-count">3</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -600,7 +692,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-count">4</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
