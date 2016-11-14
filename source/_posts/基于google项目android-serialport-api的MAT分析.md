@@ -32,7 +32,7 @@ categories:
 	        }
 	    }
 ```
-	
+<!-- more -->	
 
 解决方法很简单，添加一个mInputStream.available() > 0，如果有数据，就进行读取。没有数据就不读取。这样就避开了阻塞问题。
  
