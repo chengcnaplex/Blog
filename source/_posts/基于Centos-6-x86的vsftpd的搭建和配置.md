@@ -27,6 +27,4 @@ categories:
 
 5. 配置文件关系图：
 
-
-
-![](\image\blog_5\centos_vsftpd.png)
+	[](\image\blog_5\centos_vsftpd.png)
